@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 – Orchestrator, Email & File Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #131625;
+    --surface2: #1a1e30;
+    --border: #252a42;
+    --accent: #4f8fff;
+    --accent2: #ff6b6b;
+    --accent3: #43e09f;
+    --accent4: #ffbe45;
+    --text: #e8ecf5;
+    --muted: #7a84a3;
+    --heading-font: 'Syne', sans-serif;
+    --body-font: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--body-font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* ── Hero ─────────────────────────────── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 80px 40px 60px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, #1a2a5e 0%, #0d0f1a 70%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content:'';
+    position:absolute; inset:0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234f8fff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events:none;
+  }
+  .module-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), #7b5fff);
+    color: #fff;
+    font-family: var(--heading-font);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: var(--heading-font);
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 36px;
+  }
+  .hero-pills {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  }
+  .pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Layout ────────────────────────────── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Nav ───────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,15,26,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; gap: 4px;
+    overflow-x: auto; padding: 0;
+    scrollbar-width: none;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-inner a {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 14px 14px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-inner a:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ── Section ───────────────────────────── */
+  .section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: flex; align-items: flex-start; gap: 18px;
+    margin-bottom: 40px;
+  }
+  .section-num {
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--heading-font);
+    font-size: 1.3rem; font-weight: 800;
+  }
+  .num-blue { background: rgba(79,143,255,0.15); color: var(--accent); border: 1px solid rgba(79,143,255,0.3); }
+  .num-red  { background: rgba(255,107,107,0.15); color: var(--accent2); border: 1px solid rgba(255,107,107,0.3); }
+  .num-green{ background: rgba(67,224,159,0.15); color: var(--accent3); border: 1px solid rgba(67,224,159,0.3); }
+  .num-gold { background: rgba(255,190,69,0.15);  color: var(--accent4); border: 1px solid rgba(255,190,69,0.3); }
+  .num-purple{ background: rgba(123,95,255,0.15); color: #a68fff; border: 1px solid rgba(123,95,255,0.3); }
+  .num-teal { background: rgba(0,200,220,0.15);   color: #00c8dc; border: 1px solid rgba(0,200,220,0.3); }
+  .num-pink  { background: rgba(255,100,200,0.15); color: #ff64c8; border: 1px solid rgba(255,100,200,0.3); }
+  .num-orange{ background: rgba(255,140,60,0.15);  color: #ff8c3c; border: 1px solid rgba(255,140,60,0.3); }
+
+  .section-title {
+    font-family: var(--heading-font);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-sub { color: var(--muted); font-size: 0.95rem; }
+
+  /* ── Cards ─────────────────────────────── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .card-icon { font-size: 1.8rem; margin-bottom: 12px; }
+  .card h3 {
+    font-family: var(--heading-font);
+    font-size: 1rem; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .card p, .card li { font-size: 0.9rem; color: var(--muted); }
+  .card ul { padding-left: 16px; }
+  .card li { margin-bottom: 4px; }
+
+  /* ── Info box ───────────────────────────── */
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  .info-box strong { color: var(--text); }
+  .info-box.green { border-left-color: var(--accent3); }
+  .info-box.gold  { border-left-color: var(--accent4); }
+  .info-box.red   { border-left-color: var(--accent2); }
+
+  /* ── Steps ───────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex; gap: 18px;
+    position: relative;
+    padding-bottom: 28px;
+  }
+  .step:last-child { padding-bottom: 0; }
+  .step-line {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .step-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--heading-font);
+    font-size: 0.85rem; font-weight: 700;
+    color: #fff; flex-shrink: 0;
+  }
+  .step-connector { width: 2px; flex: 1; background: var(--border); margin-top: 4px; }
+  .step:last-child .step-connector { display: none; }
+  .step-body { padding-top: 6px; }
+  .step-body h4 { font-family: var(--heading-font); font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+  .step-body p { font-size: 0.88rem; color: var(--muted); }
+
+  /* ── Table ─────────────────────────────── */
+  .table-wrap { overflow-x: auto; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-family: var(--heading-font);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--muted);
+  }
+  tr:hover td { background: var(--surface); }
+  td strong { color: var(--text); }
+
+  /* ── Code snippet ───────────────────────── */
+  .code-block {
+    background: #0a0c16;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .code-block .kw  { color: #a68fff; }
+  .code-block .str { color: var(--accent3); }
+  .code-block .cm  { color: var(--muted); font-style: italic; }
+  .code-block .fn  { color: var(--accent4); }
+
+  /* ── Log levels ────────────────────────── */
+  .log-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .log-row {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .log-badge {
+    font-family: var(--heading-font);
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 4px 12px; border-radius: 6px;
+    min-width: 80px; text-align: center;
+    flex-shrink: 0;
+  }
+  .log-verbose { background: rgba(79,143,255,0.15); color: var(--accent); }
+  .log-trace   { background: rgba(67,224,159,0.15); color: var(--accent3); }
+  .log-info    { background: rgba(255,190,69,0.15);  color: var(--accent4); }
+  .log-warn    { background: rgba(255,140,60,0.15);  color: #ff8c3c; }
+  .log-error   { background: rgba(255,107,107,0.15); color: var(--accent2); }
+  .log-fatal   { background: rgba(180,0,0,0.25); color: #ff4040; }
+  .log-desc    { font-size: 0.88rem; color: var(--muted); }
+
+  /* ── Two-col ─────────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media(max-width:640px){ .two-col { grid-template-columns: 1fr; } .cards { grid-template-columns: 1fr; } }
+
+  /* ── Robot comparison ───────────────── */
+  .robot-compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
+  }
+  @media(max-width:560px){ .robot-compare { grid-template-columns: 1fr; } }
+  .robot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    text-align: center;
+  }
+  .robot-card .robot-icon { font-size: 2.8rem; margin-bottom: 12px; }
+  .robot-card h3 { font-family: var(--heading-font); font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  .robot-card p  { font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
+  .robot-card ul { list-style: none; font-size: 0.85rem; color: var(--muted); text-align: left; }
+  .robot-card li::before { content: '✓ '; color: var(--accent3); }
+
+  /* ── Tip box ─────────────────────────── */
+  .tip {
+    background: rgba(67,224,159,0.07);
+    border: 1px solid rgba(67,224,159,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+  .tip-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+  .tip p { color: var(--muted); }
+  .tip strong { color: var(--text); }
+
+  /* ── Workflow flow ───────────────────── */
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 24px;
+  }
+  .flow-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 1.1rem; }
+
+  /* ── Highlight text ─────────────────── */
+  .highlight { color: var(--accent); font-weight: 600; }
+  .highlight-green { color: var(--accent3); font-weight: 600; }
+  .highlight-gold  { color: var(--accent4); font-weight: 600; }
+
+  /* ── Footer ─────────────────────────── */
+  footer {
+    text-align: center; padding: 40px 24px;
+    color: var(--muted); font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+  footer strong { color: var(--text); }
+
+  /* ── Animations ──────────────────────── */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .section { animation: fadeUp 0.5s ease both; }
+  .section:nth-child(2){ animation-delay:0.05s }
+  .section:nth-child(3){ animation-delay:0.1s }
+  .section:nth-child(4){ animation-delay:0.15s }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══════════════════════════════════════════ -->
+<div class="hero">
+  <div class="module-tag">Module 4</div>
+  <h1>Orchestrator, Email &amp;<br>File Automation</h1>
+  <p>A beginner-friendly complete guide to UiPath email automation, file handling, data tables, publishing, Orchestrator, robot configuration, scheduling, and monitoring.</p>
+  <div class="hero-pills">
+    <a class="pill" href="#email">📧 Email</a>
+    <a class="pill" href="#file">📁 File &amp; Directory</a>
+    <a class="pill" href="#datatable">📊 Data Tables</a>
+    <a class="pill" href="#publishing">🚀 Publishing</a>
+    <a class="pill" href="#orchestrator">🌐 Orchestrator</a>
+    <a class="pill" href="#robot">🤖 Robot Config</a>
+    <a class="pill" href="#scheduling">⏰ Scheduling</a>
+    <a class="pill" href="#monitoring">📈 Monitoring</a>
+  </div>
+</div>
+
+<!-- ══ NAV ═══════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#email">📧 Email</a>
+    <a href="#file">📁 Files</a>
+    <a href="#datatable">📊 DataTable</a>
+    <a href="#publishing">🚀 Publishing</a>
+    <a href="#orchestrator">🌐 Orchestrator</a>
+    <a href="#robot">🤖 Robots</a>
+    <a href="#scheduling">⏰ Scheduling</a>
+    <a href="#monitoring">📈 Monitoring</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ══ 1. EMAIL AUTOMATION ══════════════════════════ -->
+  <section class="section" id="email">
+    <div class="section-header">
+      <div class="section-num num-blue">1</div>
+      <div>
+        <div class="section-title">Email Automation</div>
+        <div class="section-sub">Automatically send, receive, and process emails using UiPath — no manual effort needed.</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>What is Email Automation?</strong><br>
+      Email automation in UiPath means you write a robot (bot) that can <strong>send emails, read emails, filter them, and download attachments</strong> — all without you clicking a single button. Think of it as giving your computer a brain to handle your inbox.
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📡 Email Protocols — How Emails Travel</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">📤</div>
+        <h3>SMTP</h3>
+        <p><strong>Simple Mail Transfer Protocol</strong> — used to <span class="highlight">send</span> emails. When your bot needs to send an email from Gmail or Outlook, it uses SMTP.</p>
+        <br>
+        <p style="font-size:0.82rem;">Server: <code style="color:var(--accent3)">smtp.gmail.com</code> &nbsp;|&nbsp; Port: <code style="color:var(--accent3)">465</code> (SSL)</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📥</div>
+        <h3>IMAP</h3>
+        <p><strong>Internet Message Access Protocol</strong> — used to <span class="highlight">read</span> emails from a server. IMAP keeps emails on the server so you can access them from multiple devices.</p>
+        <br>
+        <p style="font-size:0.82rem;">Server: <code style="color:var(--accent3)">imap.gmail.com</code> &nbsp;|&nbsp; Port: <code style="color:var(--accent3)">993</code></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🖥️</div>
+        <h3>Outlook Integration</h3>
+        <p>Works directly with the <strong>Microsoft Outlook desktop application</strong>. No server config needed — just the installed app. Easiest to set up for beginners!</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🔧 Key UiPath Activities</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Activity</th><th>Purpose</th><th>Protocol</th><th>Best For</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Send SMTP Mail Message</strong></td><td>Send an email from a bot</td><td>SMTP</td><td>Gmail, Yahoo, any SMTP server</td></tr>
+          <tr><td><strong>Send Outlook Mail Message</strong></td><td>Send via Outlook desktop</td><td>Outlook API</td><td>Corporate Outlook users</td></tr>
+          <tr><td><strong>Get IMAP Mail Messages</strong></td><td>Read emails from server</td><td>IMAP</td><td>Gmail, Yahoo, corporate mail</td></tr>
+          <tr><td><strong>Get Outlook Mail Messages</strong></td><td>Read from Outlook inbox</td><td>Outlook API</td><td>Outlook desktop users</td></tr>
+          <tr><td><strong>Save Attachments</strong></td><td>Download email attachments</td><td>Any</td><td>Invoice/report processing</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🔄 Typical Email Automation Workflow</h3>
+    <div class="flow">
+      <div class="flow-item">1. Connect to Email</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item">2. Read Inbox</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item">3. Filter Emails</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item">4. Download Attachments</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item">5. Process Data</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item">6. Send Reply</div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>Beginner Tip:</strong> Start with Outlook activities — they are the simplest because they don't require entering server names, ports, or passwords. Just make sure Outlook is installed and logged in on your computer.</p>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📋 SMTP Email — Step by Step (Send SMTP Mail)</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Install Mail Package</h4><p>In UiPath Studio → Manage Packages → search <code>UiPath.Mail.Activities</code> → Install.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Add "Send SMTP Mail Message" Activity</h4><p>Drag it into your workflow sequence from the Activities panel.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Fill in Properties</h4><p>Set: <strong>To</strong> (recipient), <strong>Subject</strong>, <strong>Body</strong>, <strong>Server</strong> (smtp.gmail.com), <strong>Port</strong> (465), <strong>Email</strong> &amp; <strong>Password</strong>.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Run &amp; Test</h4><p>Click Run. Check the recipient inbox to confirm the email was delivered. Execution time is usually under 5 seconds.</p></div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🎯 Real-World Applications</h3>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🧾</div><h3>Invoice Processing</h3><p>Bot reads email, downloads invoice PDF, extracts data, and enters it into ERP system.</p></div>
+      <div class="card"><div class="card-icon">🎧</div><h3>Customer Support</h3><p>Bot reads customer emails, categorizes them, and sends automatic acknowledgment replies.</p></div>
+      <div class="card"><div class="card-icon">🔔</div><h3>Automated Alerts</h3><p>System sends email notification when a job fails, a threshold is crossed, or an event occurs.</p></div>
+      <div class="card"><div class="card-icon">📊</div><h3>Report Distribution</h3><p>Bot generates an Excel report and emails it to managers every morning at 8 AM.</p></div>
+    </div>
+  </section>
+
+  <!-- ══ 2. FILE & DIRECTORY ══════════════════════════ -->
+  <section class="section" id="file">
+    <div class="section-header">
+      <div class="section-num num-red">2</div>
+      <div>
+        <div class="section-title">File &amp; Directory Handling</div>
+        <div class="section-sub">Read, write, copy, move, and delete files — and manage folders automatically.</div>
+      </div>
+    </div>
+
+    <div class="info-box red">
+      <strong>What is File Handling?</strong><br>
+      In UiPath, your robot can work with files just like you would — opening spreadsheets, reading text files, saving documents, and organizing them into folders. This is extremely useful for data entry jobs, report generation, and batch processing.
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="font-family:var(--heading-font);font-size:1rem;margin-bottom:14px;">📂 File Operations</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Operation</th><th>Activity</th></tr></thead>
+            <tbody>
+              <tr><td>Read text</td><td><strong>Read Text File</strong></td></tr>
+              <tr><td>Read CSV</td><td><strong>Read CSV</strong></td></tr>
+              <tr><td>Read Excel</td><td><strong>Read Range</strong></td></tr>
+              <tr><td>Write text</td><td><strong>Write Text File</strong></td></tr>
+              <tr><td>Write CSV</td><td><strong>Write CSV</strong></td></tr>
+              <tr><td>Write Excel</td><td><strong>Write Range</strong></td></tr>
+              <tr><td>Copy file</td><td><strong>Copy File</strong></td></tr>
+              <tr><td>Move file</td><td><strong>Move File</strong></td></tr>
+              <tr><td>Delete file</td><td><strong>Delete File</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-family:var(--heading-font);font-size:1rem;margin-bottom:14px;">🗂️ Directory (Folder) Operations</h3>
+        <div class="cards" style="grid-template-columns:1fr;">
+          <div class="card">
+            <div class="card-icon">📁</div>
+            <h3>Create Directory</h3>
+            <p>Creates a new folder at a specified path. Useful for organizing processed files.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🗑️</div>
+            <h3>Delete Directory</h3>
+            <p>Deletes a folder and all its contents. Use carefully — this is permanent!</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔍</div>
+            <h3>For Each File in Folder</h3>
+            <p>Loops through every file in a folder so you can process them one by one.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🔄 File Processing Workflow</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Get List of Files</h4><p>Use <strong>For Each File in Folder</strong> to loop through a directory (e.g., Downloads folder). You can filter by extension like *.xlsx.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Read File Content</h4><p>Use <strong>Read Text File</strong> or <strong>Read CSV</strong> to load the file data into a variable.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Process the Data</h4><p>Apply logic — filter rows, compute values, format text, etc.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Write Output</h4><p>Save results to a new file using <strong>Write Text File</strong> or <strong>Write CSV</strong>.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-line"><div class="step-dot">5</div><div class="step-connector"></div></div>
+        <div class="step-body"><h4>Move Processed Files</h4><p>Use <strong>Move File</strong> to send the processed file to an "Archive" folder, keeping your workspace clean.</p></div>
+      </div>
+    </div>
+
+    <div class="code-block">
+<span class="cm">// Example: Reading each file in Downloads folder</span>
+<span class="kw">For Each</span> CurrentFile <span class="kw">In</span> Downloads_Folder
+    <span class="cm">// Filter only Excel files</span>
+    <span class="kw">If</span> Path.GetExtension(CurrentFile) = <span class="str">".xlsx"</span>
+        <span class="fn">ReadRange</span>(CurrentFile) → Store in DataTable
+        <span class="cm">// ... process data ...</span>
+        <span class="fn">MoveFile</span>(CurrentFile, ArchiveFolder)
+    <span class="kw">End If</span>
+<span class="kw">Next</span>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🎯 Real-World Applications</h3>
+    <div class="cards">
+      <div class="card"><div class="card-icon">💾</div><h3>Data Backup</h3><p>Bot copies important files to a backup folder every night automatically.</p></div>
+      <div class="card"><div class="card-icon">📦</div><h3>Batch Processing</h3><p>Process 500 Excel files in one go — what takes days manually, the bot does in minutes.</p></div>
+      <div class="card"><div class="card-icon">📜</div><h3>Log Analysis</h3><p>Bot reads server log files, finds errors, and sends a summary email to IT team.</p></div>
+    </div>
+  </section>
+
+  <!-- ══ 3. DATA TABLE ════════════════════════════════ -->
+  <section class="section" id="datatable">
+    <div class="section-header">
+      <div class="section-num num-green">3</div>
+      <div>
+        <div class="section-title">Data Table Operations</div>
+        <div class="section-sub">Store and manipulate data in rows &amp; columns — just like a spreadsheet in memory.</div>
+      </div>
+    </div>
+
+    <div class="info-box green">
+      <strong>What is a DataTable?</strong><br>
+      A DataTable is like a temporary spreadsheet that lives in your robot's memory. It has <strong>rows and columns</strong>. You can fill it from Excel, filter its rows, add new columns, loop through it, and write it back to a file. It's one of the most important concepts in UiPath!
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🏗️ How to Create a DataTable</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🔨</div>
+        <h3>Build Data Table Activity</h3>
+        <p>Manually create a DataTable by defining column names and data types, then add rows one by one. Good for small, fixed data sets.</p>
+        <br>
+        <p style="font-size:0.82rem;">Example columns: <code>Name (String)</code>, <code>Surname (String)</code>, <code>Grade (Int32)</code></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Read Range (Excel)</h3>
+        <p>Read an entire Excel sheet into a DataTable with one activity. Check <strong>"Has Headers"</strong> so column names are recognized automatically.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📄</div>
+        <h3>Read CSV</h3>
+        <p>Load a CSV file into a DataTable. Perfect for processing exported data from databases or web applications.</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">⚙️ Common DataTable Operations</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Operation</th><th>Activity / Method</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Filter Rows</strong></td><td>Filter Data Table</td><td>Keep only rows matching a condition (e.g., Status = "Pending")</td></tr>
+          <tr><td><strong>Sort Data</strong></td><td>Sort Data Table</td><td>Arrange rows by a column in ascending or descending order</td></tr>
+          <tr><td><strong>Add Column</strong></td><td>Add Data Column</td><td>Add a new column to an existing DataTable</td></tr>
+          <tr><td><strong>Delete Column</strong></td><td>Remove Data Column</td><td>Remove an unwanted column</td></tr>
+          <tr><td><strong>Update Value</strong></td><td>row("ColName") = value</td><td>Update a cell value in a specific row</td></tr>
+          <tr><td><strong>Count Rows</strong></td><td>dt.Rows.Count</td><td>Get total number of rows</td></tr>
+          <tr><td><strong>Output as Text</strong></td><td>Output Data Table</td><td>Convert the table to a readable string for display</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🔁 Looping Through a DataTable</h3>
+    <div class="code-block">
+<span class="cm">// Use "For Each Row" activity to iterate</span>
+<span class="kw">For Each</span> row <span class="kw">In</span> myDataTable
+    <span class="cm">// Access column value using column name</span>
+    studentName = row(<span class="str">"Name"</span>).ToString
+    grade       = row(<span class="str">"Grade"</span>).ToString
+
+    <span class="cm">// Example: Check if grade is above 8</span>
+    <span class="kw">If</span> Convert.ToInt32(grade) >= 8
+        <span class="fn">Log Message</span>: studentName + <span class="str">" passed!"</span>
+    <span class="kw">End If</span>
+<span class="kw">Next</span>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>Beginner Tip:</strong> Always use <code>row("ColumnName").ToString</code> to read values. The column name must match <em>exactly</em> as it appears in the header (case-sensitive). If you get an error, check for typos!</p>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📋 Example Logic — Processing Pending Orders</h3>
+    <div class="steps">
+      <div class="step"><div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div><div class="step-body"><h4>Read Excel File</h4><p>Use Read Range → saves data into <code>dt_Orders</code> DataTable variable.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div><div class="step-body"><h4>Filter Pending Rows</h4><p>Filter Data Table where Status = "Pending" → saves to <code>dt_Pending</code>.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div><div class="step-body"><h4>Loop &amp; Process</h4><p>For Each Row in <code>dt_Pending</code> → process each order (enter into system, generate PDF, etc.)</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div><div class="step-body"><h4>Write Results</h4><p>Update Status column to "Completed" and write the DataTable back to Excel.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ══ 4. PUBLISHING ════════════════════════════════ -->
+  <section class="section" id="publishing">
+    <div class="section-header">
+      <div class="section-num num-gold">4</div>
+      <div>
+        <div class="section-title">Publishing Automation Workflows</div>
+        <div class="section-sub">Deploy your automation from UiPath Studio to Orchestrator so robots can run it.</div>
+      </div>
+    </div>
+
+    <div class="info-box gold">
+      <strong>What is Publishing?</strong><br>
+      When you finish building an automation in UiPath Studio, it lives only on your computer. <strong>Publishing</strong> packages your workflow and uploads it to Orchestrator — the central management platform — so that any robot (on any machine) can run it, even without you being present.
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📦 Key Terms to Know</h3>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>Package</h3>
+        <p>The published version of your workflow. It's a compressed file (like a .zip) uploaded to Orchestrator containing all your automation code.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">▶️</div>
+        <h3>Process</h3>
+        <p>A package linked to a folder in Orchestrator. It is the <strong>executable version</strong> — what you actually run on a robot. Package + Folder = Process.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <h3>Job</h3>
+        <p>A single execution of a Process. Every time you run a process, Orchestrator creates a "Job" record that you can monitor and track.</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🪜 Steps to Publish a Workflow</h3>
+    <div class="steps">
+      <div class="step"><div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div><div class="step-body"><h4>Design Workflow in UiPath Studio</h4><p>Build and test your automation completely. Make sure it runs without errors.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div><div class="step-body"><h4>Click "Publish" Button</h4><p>In the Studio top menu → click <strong>Publish</strong>. Choose the target (Orchestrator Tenant Feed).</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div><div class="step-body"><h4>Workflow is Packaged</h4><p>Studio converts your project into a <strong>.nupkg package</strong> with version number (e.g., v1.0.0).</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div><div class="step-body"><h4>Package Uploaded to Orchestrator</h4><p>The package appears in Orchestrator under <strong>Automations → Packages</strong>.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">5</div><div class="step-connector"></div></div><div class="step-body"><h4>Create a Process</h4><p>In Orchestrator → go to a Folder → Add → Process → select your package. This links the package to the folder.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">6</div><div class="step-connector"></div></div><div class="step-body"><h4>Assign Process to Robot &amp; Run</h4><p>Click <strong>Start Job</strong> to run the process on a connected robot immediately, or set a schedule.</p></div></div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>Beginner Tip:</strong> Every time you update your workflow and re-publish, Orchestrator creates a new version (1.0.1, 1.0.2, etc.). Old versions are still saved, so you can always roll back if something goes wrong.</p>
+    </div>
+  </section>
+
+  <!-- ══ 5. ORCHESTRATOR ══════════════════════════════ -->
+  <section class="section" id="orchestrator">
+    <div class="section-header">
+      <div class="section-num num-purple">5</div>
+      <div>
+        <div class="section-title">UiPath Orchestrator</div>
+        <div class="section-sub">The web-based command center to manage, deploy, and monitor all your automation robots.</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>What is Orchestrator?</strong><br>
+      Imagine you have 100 robots working for your company. You need a way to tell them what to do, when to do it, and keep track of whether they succeeded or failed. <strong>Orchestrator is that control center</strong> — accessible from any web browser, anywhere in the world.
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🌟 Key Features</h3>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🤖</div><h3>Robot Management</h3><p>Add, configure, and monitor all your robots (attended and unattended) from one place.</p></div>
+      <div class="card"><div class="card-icon">▶️</div><h3>Job Execution</h3><p>Start jobs manually or via triggers. See which jobs are running, queued, or completed.</p></div>
+      <div class="card"><div class="card-icon">🔐</div><h3>Asset Management</h3><p>Store credentials, settings, and shared data (called <strong>Assets</strong>) securely in Orchestrator.</p></div>
+      <div class="card"><div class="card-icon">📋</div><h3>Queue Management</h3><p>Create work queues — lists of items for robots to process one by one (like a to-do list for robots).</p></div>
+      <div class="card"><div class="card-icon">📊</div><h3>Monitoring &amp; Logs</h3><p>View real-time dashboards of robot performance, execution history, and detailed logs.</p></div>
+      <div class="card"><div class="card-icon">📁</div><h3>Folder Structure</h3><p>Organize your processes, robots, assets, and queues into folders (like departments in a company).</p></div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🏛️ Orchestrator Components Explained</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th>What is it?</th><th>Analogy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Robot</strong></td><td>A configured software robot connected to Orchestrator</td><td>An employee on your payroll</td></tr>
+          <tr><td><strong>Machine</strong></td><td>The computer where the robot runs</td><td>The employee's desk/workstation</td></tr>
+          <tr><td><strong>Process</strong></td><td>A packaged workflow linked to a folder</td><td>A task or job description</td></tr>
+          <tr><td><strong>Job</strong></td><td>A single execution of a process</td><td>One shift of work being done</td></tr>
+          <tr><td><strong>Asset</strong></td><td>Stored value (credential, text, number) used by robots</td><td>A password/key stored in a safe</td></tr>
+          <tr><td><strong>Queue</strong></td><td>A list of items for robots to process</td><td>A ticketing system or inbox</td></tr>
+          <tr><td><strong>Trigger</strong></td><td>A rule that automatically starts a job</td><td>An alarm clock for your robot</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══ 6. ROBOT CONFIGURATION ══════════════════════ -->
+  <section class="section" id="robot">
+    <div class="section-header">
+      <div class="section-num num-teal">6</div>
+      <div>
+        <div class="section-title">Robot Configuration</div>
+        <div class="section-sub">Set up and connect robots to Orchestrator so they can receive and execute tasks.</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>What is Robot Configuration?</strong><br>
+      Before a robot can run automations from Orchestrator, you need to <strong>register the machine and user</strong> in Orchestrator, then connect UiPath Assistant on that machine using a <strong>Machine Key</strong>. Think of it as activating a phone plan for your robot.
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:20px;margin-top:32px;">🤖 Types of Robots</h3>
+    <div class="robot-compare">
+      <div class="robot-card" style="border-color:rgba(79,143,255,0.4)">
+        <div class="robot-icon">👤🤖</div>
+        <h3 style="color:var(--accent)">Attended Robot</h3>
+        <p>Works <strong>alongside a human</strong>. Triggered by the user when needed. Cannot run unattended.</p>
+        <ul>
+          <li>Runs on the user's active desktop</li>
+          <li>Started from UiPath Assistant</li>
+          <li>Human supervises each run</li>
+          <li>Best for: Call center, data entry with human decisions</li>
+        </ul>
+      </div>
+      <div class="robot-card" style="border-color:rgba(67,224,159,0.4)">
+        <div class="robot-icon">🤖⚙️</div>
+        <h3 style="color:var(--accent3)">Unattended Robot</h3>
+        <p>Runs <strong>completely on its own</strong> without any human. Triggered from Orchestrator by schedule or queue.</p>
+        <ul>
+          <li>Runs 24/7 without human presence</li>
+          <li>Started remotely from Orchestrator</li>
+          <li>Needs dedicated machine/VM</li>
+          <li>Best for: Invoice processing, data migration, reporting</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🔌 Steps to Configure a Robot</h3>
+    <div class="steps">
+      <div class="step"><div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div><div class="step-body"><h4>Create a Machine in Orchestrator</h4><p>Go to Orchestrator → Admin → Machines → Add Standard Machine. Enter the computer's name.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div><div class="step-body"><h4>Copy the Machine Key</h4><p>After creating the machine, Orchestrator generates a <strong>Machine Key</strong> (a unique ID string). Copy it.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div><div class="step-body"><h4>Open UiPath Assistant on the PC</h4><p>On the physical machine → open UiPath Assistant → Settings → Orchestrator Settings.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div><div class="step-body"><h4>Connect using Machine Key</h4><p>Enter the Orchestrator URL and paste the Machine Key → click Connect. Status should show <strong>Connected, Licensed</strong>.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">5</div><div class="step-connector"></div></div><div class="step-body"><h4>Add User/Robot in Orchestrator</h4><p>Go to Robots section → Add user. Assign the robot to a folder and grant appropriate permissions.</p></div></div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>Beginner Tip:</strong> Modern Orchestrator (cloud version) uses <strong>Machine Templates</strong> instead of classic robots — the setup is simpler. You create the template, get a Client ID and Secret, and enter those in UiPath Assistant instead of a Machine Key.</p>
+    </div>
+  </section>
+
+  <!-- ══ 7. SCHEDULING ════════════════════════════════ -->
+  <section class="section" id="scheduling">
+    <div class="section-header">
+      <div class="section-num num-pink">7</div>
+      <div>
+        <div class="section-title">Scheduling</div>
+        <div class="section-sub">Automate when your robot runs — set it and forget it!</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>What is Scheduling?</strong><br>
+      Scheduling in Orchestrator allows you to <strong>automatically trigger a robot at specific times or when specific events happen</strong>, without anyone having to manually start the job. You set it once, and it runs forever on its own.
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">⏰ Types of Triggers</h3>
+    <div class="cards">
+      <div class="card" style="border-color:rgba(79,143,255,0.4)">
+        <div class="card-icon">🕐</div>
+        <h3>Time Trigger</h3>
+        <p>Runs a process at a <strong>fixed time</strong> — daily, weekly, monthly, or on a custom schedule using Cron expressions.</p>
+        <br>
+        <p style="font-size:0.82rem;"><strong>Examples:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--muted);padding-left:16px;margin-top:6px;">
+          <li>Daily at 6 PM — generate reports</li>
+          <li>Every Monday 9 AM — send weekly summary</li>
+          <li>Every 5 minutes — check for new orders</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:rgba(67,224,159,0.4)">
+        <div class="card-icon">📋</div>
+        <h3>Queue Trigger</h3>
+        <p>Runs a process <strong>when new items arrive in a Queue</strong>. The robot wakes up automatically when there's work to do.</p>
+        <br>
+        <p style="font-size:0.82rem;"><strong>Examples:</strong></p>
+        <ul style="font-size:0.82rem;color:var(--muted);padding-left:16px;margin-top:6px;">
+          <li>Process invoice when added to Invoice Queue</li>
+          <li>Handle customer request when ticket added</li>
+          <li>Start data entry when form is submitted</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🪜 How to Create a Time Trigger</h3>
+    <div class="steps">
+      <div class="step"><div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div><div class="step-body"><h4>Go to Orchestrator → Triggers</h4><p>Navigate to your Folder → Automations → Triggers → Click the blue <strong>+</strong> button.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div><div class="step-body"><h4>Select Trigger Type</h4><p>Choose <strong>Time Trigger</strong> for scheduled runs, or Queue Trigger for event-based runs.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div><div class="step-body"><h4>Define the Schedule</h4><p>Give it a name, select the Process, choose frequency (Minutes / Hourly / Daily / Weekly / Monthly), and set execution time and timezone.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div><div class="step-body"><h4>Set Execution Target</h4><p>Choose which robot or machine should run this job. Set "Allocate Dynamically" for any available robot.</p></div></div>
+      <div class="step"><div class="step-line"><div class="step-dot">5</div><div class="step-connector"></div></div><div class="step-body"><h4>Click ADD</h4><p>The trigger is now active! It will automatically start jobs at the defined schedule.</p></div></div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>Cron Expressions:</strong> For advanced scheduling, use Cron syntax. For example, <code>0 18 * * 1-5</code> means "run at 6 PM every weekday." Orchestrator has a visual builder so you don't need to memorize this syntax.</p>
+    </div>
+  </section>
+
+  <!-- ══ 8. MONITORING & LOGGING ════════════════════ -->
+  <section class="section" id="monitoring">
+    <div class="section-header">
+      <div class="section-num num-orange">8</div>
+      <div>
+        <div class="section-title">Monitoring &amp; Logging</div>
+        <div class="section-sub">Track what your robots are doing — catch errors and improve performance.</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Why Monitoring Matters?</strong><br>
+      Even the best automations can fail. A website might change, a file might be missing, or a connection might drop. <strong>Monitoring lets you see exactly what happened and when</strong>, and <strong>Logging records every step</strong> so you can find and fix problems quickly.
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📊 Monitoring Dashboard</h3>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🟢</div><h3>Running Jobs</h3><p>Jobs currently being executed by a robot in real time.</p></div>
+      <div class="card"><div class="card-icon">🔵</div><h3>Pending Jobs</h3><p>Jobs waiting in queue — robot is busy or unavailable.</p></div>
+      <div class="card"><div class="card-icon">✅</div><h3>Successful Jobs</h3><p>Jobs that completed without any errors.</p></div>
+      <div class="card"><div class="card-icon">❌</div><h3>Failed Jobs</h3><p>Jobs that threw an unhandled error. Check logs to debug.</p></div>
+      <div class="card"><div class="card-icon">⏸️</div><h3>Suspended Jobs</h3><p>Jobs paused, waiting for human input or approval.</p></div>
+      <div class="card"><div class="card-icon">⏱️</div><h3>Execution Time</h3><p>How long each job took — useful for performance optimization.</p></div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📝 Log Levels — Explained for Beginners</h3>
+    <div class="log-grid">
+      <div class="log-row">
+        <span class="log-badge log-verbose">VERBOSE</span>
+        <span class="log-desc">Records <strong>every single detail</strong> of the workflow execution — every activity, every variable change. Useful for deep debugging but creates very large log files. Use only while testing.</span>
+      </div>
+      <div class="log-row">
+        <span class="log-badge log-trace">TRACE</span>
+        <span class="log-desc">Records minute details at specific areas of the process — more selective than Verbose. Doesn't include every variable or argument, but logs flow details.</span>
+      </div>
+      <div class="log-row">
+        <span class="log-badge log-info">INFO</span>
+        <span class="log-desc">Records normal operational information — "Process started", "Read 150 records from Excel", "Email sent to manager@company.com". This is the most common log level for production.</span>
+      </div>
+      <div class="log-row">
+        <span class="log-badge log-warn">WARN</span>
+        <span class="log-desc">Logs potential issues that didn't cause failure — "Element not found on web page, retrying...", "File missing in folder, skipping". Something unexpected happened but the robot continued.</span>
+      </div>
+      <div class="log-row">
+        <span class="log-badge log-error">ERROR</span>
+        <span class="log-desc">Logs technical exceptions that caused a failure — "NullReferenceException in Main.xaml at activity Get Outlook Mails". Essential for debugging. Always include Error logs in production.</span>
+      </div>
+      <div class="log-row">
+        <span class="log-badge log-fatal">FATAL</span>
+        <span class="log-desc">Logs critical, <strong>unrecoverable</strong> failures — the robot crashed completely and cannot continue under any condition. Requires immediate human attention.</span>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">📜 How to Add Logging in UiPath Studio</h3>
+    <div class="code-block">
+<span class="cm">// Use "Log Message" activity anywhere in your workflow</span>
+
+<span class="cm">// Good practice: Log at start of process</span>
+<span class="fn">Log Message</span>(Level: <span class="str">Info</span>, Message: <span class="str">"Invoice processing started. Total invoices: "</span> + dt_invoices.Rows.Count.ToString)
+
+<span class="cm">// Log each important step</span>
+<span class="fn">Log Message</span>(Level: <span class="str">Info</span>, Message: <span class="str">"Processing invoice: "</span> + invoiceID)
+
+<span class="cm">// Log warnings</span>
+<span class="fn">Log Message</span>(Level: <span class="str">Warn</span>, Message: <span class="str">"Invoice amount is unusually high: "</span> + amount)
+
+<span class="cm">// Log errors in Try-Catch</span>
+<span class="kw">Catch</span> ex <span class="kw">As</span> Exception
+    <span class="fn">Log Message</span>(Level: <span class="str">Error</span>, Message: <span class="str">"Failed to process invoice: "</span> + ex.Message)
+    </div>
+
+    <h3 style="font-family:var(--heading-font);font-size:1.1rem;margin-bottom:16px;margin-top:32px;">🔑 Why Monitoring &amp; Logging are Important</h3>
+    <div class="cards">
+      <div class="card"><div class="card-icon">🐛</div><h3>Debugging</h3><p>When something goes wrong, logs tell you exactly which line, which activity, and what the error message was.</p></div>
+      <div class="card"><div class="card-icon">📈</div><h3>Performance</h3><p>See how long each step takes. Identify bottlenecks and optimize your workflow to run faster.</p></div>
+      <div class="card"><div class="card-icon">📋</div><h3>Audit Records</h3><p>In regulated industries (banking, healthcare), logs prove that your automation ran correctly and on time.</p></div>
+      <div class="card"><div class="card-icon">📡</div><h3>Alerts</h3><p>Orchestrator can send email alerts when jobs fail, so your team is notified immediately without checking manually.</p></div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <p><strong>Best Practice:</strong> Always use <span class="highlight-green">Info</span> level logs at the start and end of your process, and inside important loops. Use <span class="highlight">Error</span> logs inside every Try-Catch block. This gives you full visibility without creating enormous log files.</p>
+    </div>
+  </section>
+
+  <!-- ══ QUICK REFERENCE ═══════════════════════════════ -->
+  <section class="section" id="reference">
+    <div class="section-header">
+      <div class="section-num" style="background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--border);">⚡</div>
+      <div>
+        <div class="section-title">Quick Reference Cheat Sheet</div>
+        <div class="section-sub">Everything at a glance — perfect for exam preparation.</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Topic</th><th>Key Concept</th><th>Remember This</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Email</strong></td><td>SMTP = Send, IMAP = Read, Outlook = Desktop</td><td>Use Outlook activities for simplest setup</td></tr>
+          <tr><td><strong>File Ops</strong></td><td>Read/Write/Copy/Move/Delete files</td><td>"For Each File in Folder" to loop through directory</td></tr>
+          <tr><td><strong>DataTable</strong></td><td>In-memory table of rows &amp; columns</td><td>Access values with <code>row("ColumnName").ToString</code></td></tr>
+          <tr><td><strong>Publishing</strong></td><td>Studio → Package → Orchestrator → Process</td><td>Package + Folder = Process (executable)</td></tr>
+          <tr><td><strong>Orchestrator</strong></td><td>Web platform to manage robots &amp; jobs</td><td>Contains: Robots, Machines, Processes, Jobs, Queues, Assets</td></tr>
+          <tr><td><strong>Robot Types</strong></td><td>Attended (with human) vs Unattended (autonomous)</td><td>Unattended = 100% automated, 24/7</td></tr>
+          <tr><td><strong>Scheduling</strong></td><td>Time Trigger vs Queue Trigger</td><td>Time = fixed clock; Queue = when data arrives</td></tr>
+          <tr><td><strong>Log Levels</strong></td><td>Verbose &gt; Trace &gt; Info &gt; Warn &gt; Error &gt; Fatal</td><td>Use Info for normal flow, Error in catch blocks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<footer>
+  <strong>Module 4 — Orchestrator, Email &amp; File Automation</strong><br>
+  <span style="margin-top:6px;display:block;">UiPath RPA Development · Complete Study Guide for Beginners</span>
+</footer>
+
+</body>
+</html>
